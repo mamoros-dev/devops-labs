@@ -1,0 +1,22 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mamoros-helm-gitops
+  namespace: argocd
+spec:
+  project: default
+  source:
+    # Tu repositorio público en GitHub
+    repoURL: 'https://github.com/mamoros-dev/mamoros-dev.github.io.git'
+    targetRevision: HEAD
+    path: casos-reales/06_Kubernetes_GitOps/mi-app
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

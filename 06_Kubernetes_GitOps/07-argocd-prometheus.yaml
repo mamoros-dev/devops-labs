@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: prometheus-stack
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: 'https://prometheus-community.github.io/helm-charts'
+    chart: kube-prometheus-stack
+    targetRevision: 61.3.0
+    helm:
+      values: |
+        prometheusOperator:
+          admissionWebhooks:
+            enabled: false
+        prometheus:
+          enabled: true
+          prometheusSpec:
+            serviceMonitorSelectorNilUsesHelmValues: false
+            podMetadata:
+              annotations: {}
+        # Desactivar integraciones que fallan en kind local
+        kubeControllerManager:
+          enabled: false
+        kubeScheduler:
+          enabled: false
+        kubeEtcd:
+          enabled: false
+        kubeProxy:
+          enabled: false
+        grafana:
+          adminPassword: "admin"
+  destination:
+    server: 'https://kubernetes.default.svc'
+    namespace: monitoring
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - ServerSideApply=true
