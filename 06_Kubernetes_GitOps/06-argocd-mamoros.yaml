@@ -7,9 +7,9 @@ spec:
   project: default
   source:
     # Tu repositorio público en GitHub
-    repoURL: 'https://github.com/mamoros-dev/mamoros-dev.github.io.git'
+    repoURL: 'https://github.com/mamoros-dev/devops-labs.git'
     targetRevision: HEAD
-    path: casos-reales/06_Kubernetes_GitOps/mi-app
+    path: 06_Kubernetes_GitOps/mi-app
     helm:
       valueFiles:
         - values.yaml
