@@ -1,0 +1,44 @@
+---
+- name: Configurar Servidor Web vía Inventario Dinámico
+  hosts: tag_webservers # <-- Apunta al grupo dinámico creado a partir del Tag Role=webservers
+  become: true
+
+  tasks:
+    - name: Actualizar índice de paquetes de Ubuntu
+      apt:
+        update_cache: yes
+
+    - name: Instalar Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Crear página web de prueba (Inventario Dinámico)
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>DevOps Lab - Inventario Dinámico</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #eef2f5; }
+                  h1 { color: #27ae60; }
+                  p { color: #2c3e50; font-size: 1.2em; }
+                  .card { background: white; padding: 25px; display: inline-block; border-radius: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
+              </style>
+          </head>
+          <body>
+              <div class="card">
+                  <h1>⚡ Inventario Dinámico Operativo</h1>
+                  <p>Instancia descubierta automáticamente vía API de AWS mediante el Tag <strong>Role=webservers</strong>.</p>
+              </div>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Iniciar y habilitar servicio Nginx
+      service:
+        name: nginx
+        state: started
+        enabled: yes

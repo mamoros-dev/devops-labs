@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ site_title }}</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f4f6f9; color: #333; text-align: center; padding-top: 50px; }
+        .card { background: white; max-width: 600px; margin: 0 auto; padding: 25px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        .badge { background-color: #007bff; color: white; padding: 5px 10px; border-radius: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🚀 {{ site_title }}</h1>
+        <p>Servidor aprovisionado mediante <strong>Roles de Ansible</strong> y plantillas <strong>Jinja2</strong>.</p>
+        <p><span class="badge">Entorno: {{ environment_name }}</span></p>
+        <hr>
+        <h3>Información Dinámica del Servidor (Ansible Facts):</h3>
+        <p><strong>Nombre del Host:</strong> {{ ansible_hostname }}</p>
+        <p><strong>IP Privada:</strong> {{ ansible_default_ipv4.address }}</p>
+        <p><strong>Sistema Operativo:</strong> {{ ansible_distribution }} {{ ansible_distribution_version }}</p>
+    </div>
+</body>
+</html>

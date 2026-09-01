@@ -1,0 +1,45 @@
+---
+- name: Configurar Servidor Web Nginx
+  hosts: webservers
+  become: true # Se ejecuta como usuario root (sudo)
+
+  tasks:
+    - name: Actualizar el índice de paquetes de Ubuntu (apt update)
+      apt:
+        update_cache: yes
+
+    - name: Instalar el servidor web Nginx
+      apt:
+        name: nginx
+        state: present
+
+    - name: Crear una página web personalizada de bienvenida
+      copy:
+        content: |
+          <!DOCTYPE html>
+          <html>
+          <head>
+              <title>DevOps Lab - Terraform + Ansible</title>
+              <style>
+                  body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; background-color: #f4f4f9; }
+                  h1 { color: #2c3e50; }
+                  p { color: #34495e; font-size: 1.2em; }
+                  .card { background: white; padding: 20px; display: inline-block; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+              </style>
+          </head>
+          <body>
+              <div class="card">
+                  <h1>🚀 Despliegue Exitoso!</h1>
+                  <p>Infraestructura creada con <strong>Terraform</strong></p>
+                  <p>Configuracion y servidor Nginx gestionado por <strong>Ansible</strong></p>
+              </div>
+          </body>
+          </html>
+        dest: /var/www/html/index.html
+        mode: '0644'
+
+    - name: Asegurar que Nginx esta iniciado y habilitado en el arranque
+      service:
+        name: nginx
+        state: started
+        enabled: yes
