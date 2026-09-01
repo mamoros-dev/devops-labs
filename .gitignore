@@ -1,0 +1,183 @@
+# ==========================================
+# Comprehensive DevOps .gitignore
+# ==========================================
+
+# ------------------------------------------
+# 1. SECRETS, CREDENTIALS & SENSITIVE DATA
+# ------------------------------------------
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+!.env.template
+*.env
+
+# Keys, certificates, and tokens
+*.pem
+*.key
+*.pub
+*.crt
+*.pfx
+*.p12
+*.asc
+*.gpg
+id_rsa*
+id_ed25519*
+secrets.yml
+secrets.yaml
+credentials.yml
+credentials.yaml
+service-account*.json
+*_service_account.json
+
+# Shell histories and local logs
+.bash_history
+.zsh_history
+*.log
+
+# ------------------------------------------
+# 2. TERRAFORM & OPEN TOFU
+# ------------------------------------------
+# Local .terraform directories
+**/.terraform/
+
+# State files (contains sensitive outputs and secrets)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Crash log files
+crash.log
+crash.*.log
+
+# Exclude sensitive variables files
+*.tfvars
+*.tfvars.json
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# CLI configuration files
+.terraformrc
+terraform.rc
+
+# ------------------------------------------
+# 3. VAGRANT
+# ------------------------------------------
+# Local Vagrant directory
+.vagrant/
+
+# Custom boxes
+*.box
+
+# ------------------------------------------
+# 4. ANSIBLE
+# ------------------------------------------
+# Ansible temporary/retry files
+*.retry
+
+# Vault password files
+.vault_pass
+.vault_password
+*.vault
+
+# Galaxy downloaded roles/collections
+/roles/galaxy_*
+/roles/external/
+
+# ------------------------------------------
+# 5. DOCKER & CONTAINERIZATION
+# ------------------------------------------
+# Local docker-compose overrides
+docker-compose.override.yml
+docker-compose.override.yaml
+
+# Container storage / build context artifacts
+*.tar.gz
+*.tar
+*.iso
+
+# ------------------------------------------
+# 6. KUBERNETES & HELM
+# ------------------------------------------
+# Helm dependencies and releases
+charts/*.tgz
+.helm/
+helm-values.local.yaml
+
+# Kubeconfig (prevent pushing active local clusters)
+kubeconfig
+.kube/
+config
+
+# Kustomize builds
+kustomize-out/
+
+# ------------------------------------------
+# 7. MONITORING & LOGGING (Grafana, Prometheus, ELK)
+# ------------------------------------------
+# Local data directories for dev databases/monitoring tools
+prometheus_data/
+grafana_data/
+elasticsearch_data/
+loki_data/
+
+# Dashboards & alert exports containing dev secrets
+*.grafana.json
+
+# ------------------------------------------
+# 8. CI/CD & PIPELINES
+# ------------------------------------------
+# Local CI runner artifacts (e.g., act for GitHub Actions, GitLab runner)
+.act/
+.gitlab-runner/
+.buildkite/
+
+# Jenkins workspace/build logs
+/workspace/
+
+# ------------------------------------------
+# 9. IDEs & TEXT EDITORS
+# ------------------------------------------
+# Visual Studio Code
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains (IntelliJ, PyCharm, WebStorm, etc.)
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# Sublime Text / Vim / Emacs
+*.sublime-project
+*.sublime-workspace
+.*.swp
+.*.swo
+*~
+.DS_Store
+
+# ------------------------------------------
+# 10. OS & MISCELLANEOUS
+# ------------------------------------------
+# macOS metadata
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Windows metadata
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Temporary files
+*.tmp
+*.bak
+*.swp
