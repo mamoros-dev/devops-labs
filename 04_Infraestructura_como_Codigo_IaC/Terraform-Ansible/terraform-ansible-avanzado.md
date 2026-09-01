@@ -443,7 +443,7 @@ cd 04_gestion_secretos
 # Variables confidenciales / sensibles
 db_user: "admin_db"
 db_password: "SuperPasswordUltraSecreto2026!"
-api_key_servicio: "sk_live_998877665544332211"
+api_key_servicio: "<API_KEY_AQUI>"
 ```
 
 + Cifrar el archivo con `ansible-vault`. Ahora vamos a usar el comando oficial de la CLI `ansible-vault encrypt`.
