@@ -1,3 +1,6 @@
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Dependabot](https://img.shields.io/badge/Dependabot-active-0288d1?logo=dependabot)](./.github/dependabot.yml)  
+
 # 🚀 DevOps & Cloud Engineering Lab
 
 Repositorio de aprendizaje y arquitectura de infraestructura, contenedores, orquestación, GitOps y observabilidad.
