@@ -1,0 +1,19 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: mi-app-alerts
+  namespace: {{ .Release.Namespace }}
+  labels:
+    release: prometheus-stack
+spec:
+  groups:
+  - name: mi-app.rules
+    rules:
+    - alert: MiAppPodDown
+      expr: kube_pod_container_status_ready{namespace="dev", container="mi-app"} == 0
+      for: 1m
+      labels:
+        severity: critical
+      annotations:
+        summary: "El Pod {{ $labels.pod }} no está listo"
+        description: "El contenedor mi-app en el namespace dev no está respondiendo a las pruebas de preparación."
