@@ -1112,6 +1112,50 @@ prometheus-stack-prometheus-node-exporter-m9lhh          1/1     Running   0    
 
 ![](./docs/images/grafana.png)  
 
++ Vamos a personalizar un dashboard personalizado. Las Queries (PromQL) más habituales en la industria en `EXPLORE - QUERYS [DATA:PROMETEHEUS]`. En producción, los equipos de DevOps utilizan un conjunto de consultas estándar agrupadas bajo la metodología USE (Usage, Saturation, Errors):
+  - Salud del contenedor (Ready): `kube_pod_container_status_ready{namespace="dev", container="mi-app"}`  
+  > Para qué sirve: Saber si la app está lista para recibir tráfico (1 = Si, 0 = No).  
+  - Consumo de Memoria RAM (en Megabytes): `container_memory_working_set_bytes{namespace="dev", container="mi-app"} / 1024 / 1024`  
+  > Para qué sirve: Medir el uso real de RAM para detectar fugas de memoria.  
+  - Uso de CPU (en cores/mili-cores): `rate(container_cpu_usage_seconds_total{namespace="dev", container="mi-app"}[2m])` 
+  > Para qué sirve: Ver la carga de procesamiento que consume cada réplica.  
+  - Número de reinicios del contenedor (Restarts): `kube_pod_container_status_restarts_total{namespace="dev", container="mi-app"}` 
+  > Para qué sirve: Detectar si un pod entra en bucle de caídas (CrashLoopBackOff).
+
+```bash
+2. Creación del Dashboard Personalizado en Grafana
+
+- En Grafana (http://localhost:3000), ve al menú Dashboards -- clic en New -- New Dashboard.
+- Clic en + Add visualization y selecciona la fuente Prometheus.
+- Panel 1 (Estado de Salud):
+  - PromQL: `kube_pod_container_status_ready{namespace="dev", container="mi-app"}`
+  - En el panel derecho: Cambia Time series por Stat.
+  - Title: Estado de Salud (Pods Ready)
+- Haz clic en Apply (arriba a la derecha).
+
+- Clic en Add (arriba a la derecha) -- Visualization para añadir un segundo gráfico.
+- Panel 2 (Consumo de RAM):
+  - PromQL: `container_memory_working_set_bytes{namespace="dev", container="mi-app"} / 1024 / 1024`
+  - En el panel derecho: Déjalo en Time series.
+  - Title: Consumo de RAM (MB)
+  
+- Haz clic en el icono del disco duro (arriba a la derecha) para Guardar el dashboard como Dashboard Mi App Dev.
+```
+
++ Opciones Principales del Panel Lateral Derecho. Estas opciones sirven para dar formato visual y contextuar la métrica:
+  - Graph Styles (Estilos del gráfico): Cambia el aspecto del Time Series (líneas finas, áreas rellenadas con transparencia, puntos o barras estilo histograma).
+  - Standard Options (Opciones estándar):
+    - Unit (Unidad): ¡Crucial! Le dice a Grafana qué significa el número. Puedes cambiar de números puros a bytes (Data -> bytes), Megabytes (megabytes), o porcentajes (Percent 0-100).
+    - Min / Max: Define los límites del eje vertical.
+    - Color scheme: Define si el panel cambia de verde a rojo según umbrales (Thresholds).
+  - Legend (Leyenda): Define dónde se ubica el texto explicativo (abajo del gráfico, en una tabla a la derecha, o si se oculta).
+  - Axis (Ejes): Permite cambiar las escalas del eje Y (lineal o logarítmica) y mostrar u ocultar las líneas de guía.
+  - Tooltip (Información al pasar el ratón): Controla qué ventana flotante se abre al mover el cursor sobre el gráfico (Single para ver solo una línea o All para ver el valor de todas las réplicas juntas en ese segundo).
+  - Data Links: Permite hacer clic en una gráfica para que te abra otra pestaña (por ejemplo, saltar desde el gráfico del Pod a los logs en Loki).
+
+![](./docs/images/grafana-custom.png)  
+
+
 ### Service Monitor
 
 + Qué es un ServiceMonitor?
@@ -1194,3 +1238,37 @@ miguel@DESKTOP-G47I0DM:mi-app$ kubectl get servicemonitor -n dev
 NAME                                 AGE
 mamoros-helm-gitops-servicemonitor   2m57s
 ```
+
++ Levantamos ambos servicios como:
+DASHBOARD GRAFANA: `miguel@DESKTOP-G47I0DM:06_Kubernetes_GitOps$ kubectl port-forward svc/prometheus-stack-grafana -n monitoring 3000:80 &`  
+DASHBOARD ARGOCD: `miguel@DESKTOP-G47I0DM:06_Kubernetes_GitOps$ kubectl port-forward svc/argocd-server -n argocd 8080:443 &` 
+
+### DIAGRAMA
+
++ Resumen:
+```bash
+💻 Tu Repositorio Git ──(Push)──> 🐙 ArgoCD ──(Sincroniza)──> 📦 Clúster Kubernetes
+                                                                   ├── 🛋️ Service / Pods (dev)
+                                                                   └── 📊 Prometheus Stack (monitoring)
+                                                                          ├── 🔍 ServiceMonitor (Puntero)
+                                                                          ├── 📈 Grafana (Paneles)
+                                                                          └── 🚨 Alertmanager (Alertas)
+```
+- Kind / WSL2: El entorno local que simula un clúster físico de Kubernetes.
+- Helm (mi-app): La plantilla parametrizada que empaqueta tus manifiestos YAML en un solo paquete reutilizable.
+- ArgoCD: El operador GitOps que elimina la necesidad de ejecutar comandos manuales (kubectl), manteniendo el clúster idéntico a GitHub.
+- Prometheus: La base de datos temporal que recolecta las métricas numéricas del clúster y las apps.
+- ServiceMonitor: La instrucción que le dice a Prometheus qué Pods o Servicios específicos debe rastrear.
+- Grafana: La interfaz gráfica que transforma los datos numéricos de Prometheus en dashboards visuales.
+- Alertmanager / PrometheusRule: El motor de reglas que dispara alarmas automáticas ante incidentes en el clúster.
+
++ Cómo se conectó el clúster con GitHub
+  - La conexión entre tu clúster local kind y tu repositorio de GitHub se logró mediante el patrón Pull de GitOps impulsado por ArgoCD:
+    + Instalación del Agente: Instalamos ArgoCD dentro del propio clúster en el namespace argocd. Este operador incluye un componente llamado argocd-repo-server.
+    + Conexión al Repositorio: Al crear los manifiestos de tipo Application (como 07-argocd-prometheus.yaml o la app mamoros-helm-gitops), le indicamos a ArgoCD la URL pública de tu GitHub (repoURL), la rama (targetRevision: main) y la ruta exacta de la carpeta (path).
+    + Escaneo Periódico: ArgoCD consulta constantemente la API de GitHub (o lee los cambios tras un git push). Compara el código del repositorio (Estado Deseado) con lo que está corriendo en Kubernetes (Estado Real).
+
++ Cómo funcionan las operaciones de GitOps
+  - Las operaciones automatizadas que has experimentado (sincronización y autorrecuperación) funcionan gracias a dos mecanismos de ArgoCD:
+    + Auto-Sync (Sincronización Automática): Cuando haces git push con cambios en el values.yaml o las plantillas de Helm, ArgoCD detecta la nueva versión en Git, procesa las plantillas y aplica las diferencias (kubectl apply) en el clúster sin intervención humana.
+    + Self-Healing (Autorrecuperación): Si borras un Pod o un Deployment a mano con kubectl delete, ArgoCD detecta que el clúster ha entrado en estado OutOfSync. Al tener activado selfHeal: true, ignora la acción manual y re-aplica de inmediato la definición guardada en GitHub, restaurando el servicio.
